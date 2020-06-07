@@ -1,0 +1,33 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pb push_back
+const ll max1=0x3f3f3f3f;
+struct node{
+	ll to;
+	ll val;
+};
+ll dp[100022]={};
+vector<node> q[100022];
+void dfs(ll now,ll fa){
+	for(auto it:q[now]){
+		ll x=it.to,y=it.val;
+		if(x==fa) continue;
+		dfs(x,now);
+		dp[now]+=min(y,dp[x]);
+	}
+	if(!dp[now]) dp[now]=max1;
+}
+int main(){
+	ll n,m,s;
+	cin>>n>>m>>s;
+	ll u,v,w;
+	for(int i=1;i<=m;i++){
+		cin>>u>>v>>w;
+		q[u].pb({v,w});
+		q[v].pb({u,w});
+	}
+	dfs(s,0);
+	cout<<dp[s]<<endl;
+	return 0;
+}
