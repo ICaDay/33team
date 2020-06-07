@@ -1,0 +1,44 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define pb push_back
+ll ans;
+bool vis[100002];
+struct node{
+	ll to;
+	ll val;
+};
+vector<node> p[10002];
+void dfs(ll now,ll last){
+	int cnt=0;
+	for(auto it:p[now]){
+		ll t=it.to,w=it.val;
+		if(t==last) continue;
+		dfs(t,now);
+		if(vis[t]) continue;
+		cnt++;ans+=w;
+	}
+	if(cnt&1) vis[now]=true;
+}
+int main(){
+	int t;
+	cin>>t;
+	while(t--){
+		int n;
+		cin>>n;
+		for(int i=1;i<=n;i++){
+			 p[i].clear();
+			 vis[i]=false;
+		}
+		for(int i=1;i<n;i++){
+			ll x,y,z;
+			cin>>x>>y>>z;
+			p[x].pb({y,z});
+			p[y].pb({x,z});
+		}
+		ans=0;
+		dfs(1,0);
+		cout<<ans<<endl;
+	}
+	return 0;
+}
