@@ -1,0 +1,153 @@
+#include<bits/stdc++.h>
+using namespace std;
+struct sd//初始化线段树，left：左边界，right：右边界，seg:改变的值
+{
+    int left,right,seg,maxx,sum,minn;
+    sd ()
+    {
+        memset(this,0,sizeof(this));
+    }
+};
+sd tree[500000];int pre[100000];
+void pushup(int t)//更新sum,min和max值
+{
+    tree[t].sum=tree[t*2].sum+tree[t*2+1].sum;
+tree[t].maxx=max(tree[t*2].maxx,tree[t*2+1].maxx);
+tree[t].minn=max(tree[t*2].minn,tree[t*2+1].minn);
+    return;
+}
+void build_tree(int t,int lef,int rig)//建立线段树
+{
+    tree[t].left=lef;tree[t].right=rig;
+    if(lef==rig)
+    {
+        tree[t].sum=pre[lef];
+        tree[t].maxx=pre[lef];
+        tree[t].minn=pre[lef];
+        return;
+    }
+    int mid=(lef+rig)/2;
+    build_tree(t*2,lef,mid);
+    build_tree(t*2+1,mid+1,rig);
+    pushup(t);
+}
+void pushdown(int t,int lef,int rig)
+{
+    int mid=(lef+rig)/2;
+    tree[t*2].seg+=tree[t].seg;
+    tree[t*2+1].seg+=tree[t].seg;
+    tree[t*2].maxx+=tree[t].seg;
+tree[t*2+1].maxx+=tree[t].seg;
+tree[t*2].minn+=tree[t].seg;
+    tree[t*2+1].minn+=tree[t].seg;
+    tree[t*2].sum+=(mid-lef+1)*tree[t].seg;
+    tree[t*2+1].sum+=(rig-mid)*tree[t].seg;
+    tree[t].seg=0;
+}
+void updata_add(int t,int lef,int rig,int lefbound,int rigbound,int val)
+{
+    if(lef>=lefbound&&rig<=rigbound)
+    {
+        tree[t].seg+=val;
+        tree[t].maxx+=val;
+        tree[t].minn+=val;
+        tree[t].sum+=(rig-lef+1)*val;
+        return;
+    }
+    if(tree[t].seg!=0)
+    {
+        pushdown(t,lef,rig);
+    }
+    int mid=(lef+rig)/2;
+    if(lefbound<=mid)
+    {
+        updata_add(t*2,lef,mid,lefbound,rigbound,val);
+    }
+    if(rigbound>mid)
+    {
+        updata_add(t*2+1,mid+1,rig,lefbound,rigbound,val);
+    }
+    pushup(t);
+}
+int inquiry_sum(int t,int lef,int rig,int lefbound,int rigbound)
+{
+    if(lefbound<=lef&&rigbound>=rig)
+    {
+        return tree[t].sum;
+    }
+    if(tree[t].seg!=0)
+    {
+        pushdown(t,lef,rig);
+    }
+    int mid=(lef+rig)/2,sumnow=0;
+    if(lefbound<=mid)
+    sumnow+=inquiry_sum(t*2,lef,mid,lefbound,rigbound);
+    if(rigbound>=mid+1)
+    sumnow+=inquiry_sum(t*2+1,mid+1,rig,lefbound,rigbound);
+    return sumnow;
+} 
+int inquiry_max(int t,int lef,int rig,int lefbound,int rigbound)//t：树的下标，lef：该下标的左边//界，rig：该下标的右边界，lefbound：查询的左边界，rigbound：查询的右边界，查询最       //大值
+{
+    if(lefbound<=lef&&rigbound>=rig)
+    {
+        return tree[t].maxx;
+    }
+    if(tree[t].seg!=0)
+    {
+        pushdown(t,lef,rig);
+    }
+    int mid=(lef+rig)/2,maxx2=0;
+    if(lefbound<=mid)
+    {
+        maxx2=max(maxx2,inquiry_max(t*2,lef,mid,lefbound,rigbound));
+    }
+    if(rigbound>=mid+1)
+    {
+        maxx2=max(maxx2,inquiry_max(t*2+1,mid+1,rig,lefbound,rigbound));
+    }
+    return maxx2;
+}
+int inquiry_min(int t,int lef,int rig,int lefbound,int rigbound)//t：树的下标，lef：该下标的左边//界，rig：该下标的右边界，lefbound：查询的左边界，rigbound：查询的右边界，查询最       //小值
+{
+    if(lefbound<=lef&&rigbound>=rig)
+    {
+        return tree[t].minn;
+    }
+    if(tree[t].seg!=0)
+    {
+        pushdown(t,lef,rig);
+    }
+    int mid=(lef+rig)/2,minn2=INT_MAX;
+    if(lefbound<=mid)
+    {
+        minn2=min(minn2,inquiry_min(t*2,lef,mid,lefbound,rigbound));
+    }
+    if(rigbound>=mid+1)
+    {
+        minn2=min(minn2,inquiry_min(t*2+1,mid+1,rig,lefbound,rigbound));
+    }
+    return minn2;
+}
+
+int main()
+{
+    int num,a,b,c,d;
+    scanf("%d",&num);//输入的数据个数
+    for(int i=1;i<=num;i++)
+    {
+        scanf("%d",&pre[i]);//输入的数据
+    }
+    build_tree(1,1,num);
+        
+            scanf("%d%d",&b,&c);//
+            printf("第%d至第%d个数据的和是：%d\n",b,c,inquiry_sum(1,1,num,b,c));//
+            
+            scanf("%d%d",&b,&c);//
+            printf("第%d至第%d个数据的最大值是：%d\n",b,c,inquiry_max(1,1,num,b,c));//
+
+       
+            scanf("%d%d%d",&b,&c,&d);
+            updata_add(1,1,num,b,c,d);//将b到c的值都增加d
+
+    return 0;
+}
