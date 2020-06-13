@@ -1,0 +1,41 @@
+#include<bits/stdc++.h>
+using namespace std;
+int tree[500010];
+int x[500010];
+int n,m;
+int lowbit(int y){
+	return y&-y;
+}
+void add(int y,int k){
+	while(y<=n){
+		tree[y]+=k;
+		y+=lowbit(y);
+	}
+}
+int search(int y){
+	int ans=0;
+	while(y!=0){
+		ans+=tree[y];
+		y-=lowbit(y);
+	}
+	return ans;
+}
+int main(){
+	cin>>n>>m;
+	for(int i=1;i<=n;i++){
+		cin>>x[i];
+	}
+	for(int i=1;i<=m;i++){
+		int a,b,c,d;
+		cin>>a;
+		if(a==1){
+			cin>>b>>c>>d;
+			add(b,d);
+			add(c+1,-d);
+		}else{
+			cin>>b;
+			cout<<search(b)+x[b]<<endl;
+		}
+	}
+	return 0;
+}
